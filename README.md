@@ -9,9 +9,7 @@ It includes a clean **web UI** with a `video.js` player and controls to skip vid
 
 - 🔁 **24/7 Streaming:** Loops a YouTube playlist or single video indefinitely.  
 - 🖥️ **Web UI:** Clean, responsive interface using `video.js`.  
-- ⏭️ **Playlist Control:** “Next” and “Previous” buttons to skip through videos.  
-- ⏳ **Loading Animations:** Buttons show spinners while the next stream is prepared.  
-- 🕓 **DVR Timeline:** Seekable playback to rewind live streams.  
+- ⏭️ **Playlist Control:** “Next” and “Previous” buttons to skip through videos.   
 - ⚙️ **Configurable:** Change YouTube URL, quality, and port easily.
 
 ---
