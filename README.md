@@ -95,7 +95,7 @@ PORT = 8081
 # Choose from: "1080p", "720p", "480p", "360p"
 QUALITY = "720p"
 ```
-Create Cookies.txt file inside YT Restream directory for bypass youtube auth, cookies can get in browser like Chrome, Edge, or Firefox using addons like Cookie Editor.
+Create cookies.txt file inside YT Restream directory for bypass youtube auth, cookies can get in browser like Chrome, Edge, or Firefox using addons like Cookie Editor.
 
 
 ---
