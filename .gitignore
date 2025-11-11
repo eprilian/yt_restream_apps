@@ -1,0 +1,25 @@
+---
+
+### `.gitignore`
+
+This file is very important. It prevents you from accidentally committing your video stream files (`hls/`) or Python cache files to a Git repository.
+
+Create a new file named `.gitignore` (with the `.` at the beginning) in your main project folder.
+
+```gitignore
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.egg-info/
+.env
+
+# Project-specific: IGNORE ALL STREAM FILES
+/hls/
+
+# Cookies File
+.cookies.txt
