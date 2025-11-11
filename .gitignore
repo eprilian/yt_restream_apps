@@ -21,5 +21,6 @@ venv/
 # Project-specific: IGNORE ALL STREAM FILES
 /hls/
 
-# Cookies File
-.cookies.txt
+# Private file
+cookies.txt
+*.cookie
