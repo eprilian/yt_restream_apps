@@ -1,5 +1,5 @@
 # config.py
 # Paste your YouTube URL and desired settings here.
-YOUTUBE_URL = "https://www.youtube.com/playlist?list=PLfEpwox-vkk5IHfrpgRLnP_Ao69igmM4v" 
-PORT = 8081
-QUALITY = "480p"
+YOUTUBE_URL = "<link-video-or-playlist-from-youtube>" 
+PORT = <port-to-use> 
+QUALITY = "<quality-restream>" # 360p/480p/720p/1080p
