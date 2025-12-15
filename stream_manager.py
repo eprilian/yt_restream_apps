@@ -63,6 +63,15 @@ class StreamManager:
         self.m3u8_file = os.path.join(HLS_DIR, "stream.m3u8")
         os.makedirs(HLS_DIR, exist_ok=True)
         
+        # --- Cookie Check ---
+        self.cookie_file = os.path.join(os.getcwd(), "cookies.txt")
+        if os.path.exists(self.cookie_file):
+            print(f"✅ Found cookies.txt at: {self.cookie_file}")
+        else:
+            print(f"⚠️ WARNING: cookies.txt NOT found at {self.cookie_file}")
+            print("   You may get 'Sign in to confirm you're not a bot' errors.")
+            self.cookie_file = None # Disable if not found to prevent crash
+
         # --- Start the Worker ---
         self.worker_thread = threading.Thread(target=self._stream_worker, daemon=True)
         self.worker_thread.start()
@@ -111,13 +120,28 @@ class StreamManager:
 
     # --- Private Methods (Internal Worker Logic) ---
 
+    def _get_common_opts(self):
+        """Returns common yt-dlp options including cookies if available."""
+        opts = {
+            "quiet": True,
+            "ignoreerrors": True,
+            # We removed 'source_address' here. 
+            # This allows yt-dlp to use IPv6 if that is all you have,
+            # or IPv4 if you have that. It won't crash either way.
+        }
+        if self.cookie_file:
+            opts["cookiefile"] = self.cookie_file
+        return opts
+
     def _get_playlist_videos(self, url):
         """Gets a list of video PAGE URLs from a playlist or single video URL."""
-        playlist_ydl_opts = {
-            "quiet": True, "ignoreerrors": True,
-            "extract_flat": True, "skip_download": True,
+        playlist_ydl_opts = self._get_common_opts()
+        playlist_ydl_opts.update({
+            "extract_flat": True, 
+            "skip_download": True,
             "playlistreverse": False
-        }
+        })
+
         print(f"🔎 Finding videos in: {url} (Top-to-Bottom)")
         with yt_dlp.YoutubeDL(playlist_ydl_opts) as ydl:
             try:
@@ -133,12 +157,12 @@ class StreamManager:
     def _get_media_url(self, video_url, video_format):
         """Gets the raw video and audio stream URLs."""
         print(f" extracting media URLs for: {video_url}")
-        media_ydl_opts = {
+        media_ydl_opts = self._get_common_opts()
+        media_ydl_opts.update({
             "format": video_format, 
-            "quiet": True, 
-            "ignoreerrors": True,
             "extractor_args": {"youtube": {"client": "android"}}
-        }
+        })
+
         with yt_dlp.YoutubeDL(media_ydl_opts) as ydl:
             try:
                 info = ydl.extract_info(video_url, download=False)
@@ -167,13 +191,6 @@ class StreamManager:
             """Launches the ffmpeg subprocess."""
             print(f"🎥 Starting ffmpeg stream ({resolution} @ {bitrate})...")
 
-            # # --- DEBUG URLs (Keep this for now) ---
-            # print("\n--- DEBUG: FFMPEG URLS ---")
-            # print(f"VIDEO URL: {video_url}")
-            # print(f"AUDIO URL: {audio_url}")
-            # print("----------------------------\n")
-
-            # --- CORRECTED LOGIC ---
             cmd_input = []
             cmd_map = []
 
@@ -185,7 +202,6 @@ class StreamManager:
                 # Handle separate video/audio streams
                 cmd_input = ["-i", video_url, "-i", audio_url]
                 cmd_map = ["-map", "0:v:0", "-map", "1:a:0"]
-            # --- END OF CORRECTION ---
                 
             cmd = [
                 "ffmpeg", "-re",
@@ -203,10 +219,6 @@ class StreamManager:
                 "-hls_segment_filename", f"{HLS_DIR}/stream%03d.ts",
                 f"{HLS_DIR}/stream.m3u8"
             ]
-            
-            # print("\n--- DEBUG: FFMPEG FULL COMMAND ---")
-            # print(' '.join(cmd))
-            # print("----------------------------------\n")
             
             # We now redirect stderr to stdout to see errors
             return subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.DEVNULL)
@@ -322,7 +334,7 @@ class StreamManager:
                 self.stream_ready.clear() # Set status to "loading"
 
                 self.ffmpeg_proc = self._stream_video(video_url, audio_url,
-                                                self.config["resolution"], self.config["bitrate"])
+                                                        self.config["resolution"], self.config["bitrate"])
 
                 if not self._wait_for_stream(self.m3u8_file):
                     print("❌ ffmpeg failed to start. Skipping.")
